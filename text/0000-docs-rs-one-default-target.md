@@ -53,6 +53,9 @@ After this change, docs.rs will only build one platform by default: `x86_64-unkn
 This only changes the default, you can still opt-in to more or different targets if you choose
 by adding `targets = [ ... ]` to the [docs.rs metadata] in `Cargo.toml`.
 
+All existing documentation will be kept.
+No previous releases will be affected, only releases made after the RFC was merged.
+
 For most users, this will have no impact.
 Some crates that target many different platforms will be affected,
 especially if their features are substantially different between platforms.
@@ -178,8 +181,7 @@ The section should return to the examples given in the previous section, and exp
 # Drawbacks
 [drawbacks]: #drawbacks
 
-- This is a backwards-incompatible change,
-and some crates that have different docs on different platforms will be missing those docs.
+- Some crates that have different docs on different platforms will be missing those docs.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
