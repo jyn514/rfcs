@@ -161,6 +161,12 @@ but it has to be done by the crate maintainers, not by the docs.rs maintainers.
 The maintainers are often not aware that their crate fails to build when cross-compiled,
 or interested in putting in the effort to make it succeed.
 
+## Background: How much is a lot?
+
+Currently, docs.rs adds roughly 200k files a day to the server.
+It has 3.2 terabytes in storage, with about 2 gigabytes added per day.
+There are a total of approximately 320 million files currently stored.
+
 ## Background: Other reasons storage costs are high
 
 - Currently, docs.rs does not compress HTML documentation,
