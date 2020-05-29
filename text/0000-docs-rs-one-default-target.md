@@ -31,8 +31,6 @@ then queue times will go down for maintainers and storage costs will down for th
 
 See [the issue for building a single target][docs.rs#343] for more of the history behind the motivation.
 
-[docs.rs#343]: https://github.com/rust-lang/docs.rs/issues/343
-
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
@@ -257,7 +255,7 @@ The section merely provides additional information.
 
 [platform support]: https://forge.rust-lang.org/release/platform-support.html
 [docs.rs metadata]: https://docs.rs/about#metadata
-[winapi commit]: https://github.com/retep998/winapi-rs/commit/0090d411766ff22a2f280fc42e6a61e04780cdd4
+[winapi-commit]: https://github.com/retep998/winapi-rs/commit/0090d411766ff22a2f280fc42e6a61e04780cdd4
 [remove-duplicate-default]: https://github.com/rust-lang/docs.rs/pull/534
 [opt-in single target]: https://github.com/rust-lang/docs.rs/pull/632
 [non-tier-one-targets]: https://github.com/rust-lang/docs.rs/pull/633
@@ -267,3 +265,5 @@ The section merely provides additional information.
 [docs.rs#491]: https://github.com/rust-lang/docs.rs/pull/491
 [docs.rs#780]: https://github.com/rust-lang/docs.rs/pull/780
 [duplicate-source]: https://github.com/rust-lang/rust/issues/67804#issuecomment-570320452
+[docs.rs#343]: https://github.com/rust-lang/docs.rs/issues/343
+[conditional compilation]:https://doc.rust-lang.org/reference/conditional-compilation.html
