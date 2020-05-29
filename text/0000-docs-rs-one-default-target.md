@@ -43,11 +43,11 @@ and are linked in a 'Platform' dropdown on each documentation page.
 
 Currently, docs.rs builds documentation for 5 [tier 1 platforms][platform support] by default:
 
-- x86_64-unknown-linux-gnu
-- i686-unknown-linux-gnu
-- x86_64-apple-darwin
-- i686-pc-windows-msvc
-- x86_64-pc-windows-msvc
+- `x86_64-unknown-linux-gnu`
+- `i686-unknown-linux-gnu`
+- `x86_64-apple-darwin`
+- `i686-pc-windows-msvc`
+- `x86_64-pc-windows-msvc`
 
 After this change, docs.rs will only build one platform by default: `x86_64-unknown-linux-gnu`.
 This only changes the default, you can still opt-in to more or different targets if you choose
