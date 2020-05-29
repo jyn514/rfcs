@@ -181,7 +181,7 @@ The section should return to the examples given in the previous section, and exp
 # Drawbacks
 [drawbacks]: #drawbacks
 
-- Some crates that have different docs on different platforms will be missing those docs.
+- Crates that have different docs on different platforms will be missing those docs if the maintainer takes no action.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
