@@ -85,7 +85,7 @@ For implementation-oriented RFCs (e.g. for compiler internals), this section sho
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-If a crate published to crates.io has neither `targets` nor `default-target` configured in `[package.metadata.docs.rs`],
+If a crate published to crates.io has neither `targets` nor `default-target` configured in `[package.metadata.docs.rs]`,
 it will be built for the `x86_64-unknown-linux-gnu` target.
 Otherwise, if it has `default-target` set but not `targets`, it will be built for only that target.
 Otherwise, it will be built [as currently documented on docs.rs][docs.rs metadata].
