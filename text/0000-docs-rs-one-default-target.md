@@ -239,7 +239,20 @@ Please also take into consideration that rust sometimes intentionally diverges f
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-I am not aware of any future possibilities for this change.
+- docs.rs could delete documentation for non-default targets on past releases.
+  This needs some care, as the default target was only configurable
+  starting in [October 2018][docs.rs#255].
+  Releases prior to that are marked as having a default of `x86_64-unknown-linux-gnu`
+  whether that was the intent or not.
+- docs.rs could delete documentation for non-default targets on past releases,
+  excluding the latest release. This gives almost all of the storage cost savings,
+  while not affecting users very much since most use the latest version.
+  Additionally, it could avoid deleting targets that were explicitly requested
+  by `targets = ...` in Cargo.toml. This needs some care, as additional targets
+  were only configurable starting in [March 2020][docs.rs#632], and it is not possible
+  before that to distinguish explicitly requested targets from automatically built targets.
+- docs.rs could delete documentation for non-default targets on releases older than a certain date (say a year)
+- docs.rs could delete documentation for yanked releases.
 
 <!--
 Think about what the natural extension and evolution of your proposal would
@@ -275,3 +288,5 @@ The section merely provides additional information.
 [duplicate-source]: https://github.com/rust-lang/rust/issues/67804#issuecomment-570320452
 [docs.rs#343]: https://github.com/rust-lang/docs.rs/issues/343
 [conditional compilation]:https://doc.rust-lang.org/reference/conditional-compilation.html
+[docs.rs#255]: https://github.com/rust-lang/docs.rs/pull/255
+[docs.rs#632]: https://github.com/rust-lang/docs.rs/pull/632
