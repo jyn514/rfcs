@@ -90,12 +90,6 @@ it will be built for the `x86_64-unknown-linux-gnu` target.
 Otherwise, if it has `default-target` set but not `targets`, it will be built for only that target.
 Otherwise, it will be built [as currently documented on docs.rs][docs.rs metadata].
 
-This change has [already been implemented][implementation PR] and is awaiting review.
-It is a very small change in terms of code, due in large part to earlier PRs
-[building the default target only once][remove-duplicate-default],
-allowing maintainers to [opt-in to only building the default target][opt-in single target],
-and allowing maintainers to [opt-in to building targets other than the defaults][non-tier-one-targets].
-
 ## Background: Why do crates fail to build when cross-compiled?
 
 1. The most common reason by far is that they have native C dependencies.
@@ -277,10 +271,6 @@ The section merely provides additional information.
 [platform support]: https://forge.rust-lang.org/release/platform-support.html
 [docs.rs metadata]: https://docs.rs/about#metadata
 [winapi-commit]: https://github.com/retep998/winapi-rs/commit/0090d411766ff22a2f280fc42e6a61e04780cdd4
-[remove-duplicate-default]: https://github.com/rust-lang/docs.rs/pull/534
-[opt-in single target]: https://github.com/rust-lang/docs.rs/pull/632
-[non-tier-one-targets]: https://github.com/rust-lang/docs.rs/pull/633
-[implementation PR]: https://github.com/rust-lang/docs.rs/pull/532
 [GoDoc]: https://godoc.org/-/about
 [docs.rs#440]: https://github.com/rust-lang/docs.rs/issues/440
 [docs.rs#491]: https://github.com/rust-lang/docs.rs/pull/491
