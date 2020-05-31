@@ -12,18 +12,18 @@ This RFC proposes for docs.rs to by default only build one target.
 # Motivation
 [motivation]: #motivation
 
-docs.rs has high fixed storage costs.
+Most crates do not compile successfully when cross-compiled.
+As a result, trying to cross-compile them wastes time and resources for little benefit.
+By reducing the number of targets built by default, we can speed up queue time for all crates
+and additionally reduce the resource cost of operating docs.rs.
+
+The main resource cost for docs.rs is storage.
 We currently store 3.6 TB of documentation on S3, and since we never delete documentation,
 this number will only go up over time. Currently, we have no trouble affording this storage,
 but if Rust and docs.rs are to be sustainable for many years into the future,
 we need to keep an eye on how much storage we're using.
 
-Additionally, crates with many dependencies or many documentation pages can take a long time to build,
-delaying their appearance on docs.rs both for that crate and for crates following them in the queue.
-
 For most crates, the documentation is the same on every platform, so there is no need to build it many times.
-Many crates also fail to compile on platforms other than the host;
-for example, `crates-index-diff` gives an error whenever cross-compiled due to the system dependency `openssl-sys`.
 Building 5 targets means that builds take 5 times as long to finish,
 and means that docs.rs stores 5 times as much documentation, increasing our fixed costs.
 If docs.rs only builds for one target,
@@ -153,9 +153,23 @@ This is similar to the above case, but without `pkg_config` involved.
 In both these cases, it is possible to fix the crate so it will cross-compile,
 but it has to be done by the crate maintainers, not by the docs.rs maintainers.
 The maintainers are often not aware that their crate fails to build when cross-compiled,
-or interested in putting in the effort to make it succeed.
+or are not interested in putting in the effort to make it succeed.
 
-## Background: How much is a lot?
+## Background: How long are queue times currently?
+
+docs.rs has a default execution time limit of 15 minutes.
+Currently, we only have two exceptions to this limit:
+`stm32h7xx-hal` and `mimxrt1062` are allowed 20 and 25 minutes respectively.
+
+Most of the time, when the docs.rs queue gets backed up it is not due to a single crate clogging up the queue,
+but instead because many crates have been released at the same time.
+Some projects release over 300 crates at the same time,
+and building all of them can take several hours, delaying other crates in the meantime.
+
+By building only a single target, we can reduce this delay significantly.
+Additionally, this will reduce delays overall significantly, even for projects that only publish a single crate at a time.
+
+## Background: How much storage is a lot?
 
 Currently, docs.rs adds roughly 200k files a day to the server.
 It has 3.2 terabytes in storage, with about 2 gigabytes added per day.
