@@ -202,7 +202,12 @@ The section should return to the examples given in the previous section, and exp
 
 - We could keep the status quo, building all 5 targets for all crates.
   Doing so would avoid breaking the documentation for any crate,
-  but over time would increase our resource usage a great deal.
+  but keep queue times relatively high, and over time would increase our resource usage a great deal.
+- We could keep building all 5 targets but implement parallel builds.
+  This would decrease queue times and avoid a single crate from clogging up the queue,
+  at the cost of increasing resource costs.
+  Additionally, this would not help as much when many crates are released at the same time.
+  Parallel builds does not conflict with this RFC, so it is possible to implement both.
 - We could build only a single default target, but make it something other than `x86_64-unknown-linux-gnu`.
   This requires the docs.rs host to be same as the default or proc-macros and build scripts will break
   (see [docs.rs#491] and [docs.rs#440] for details).
