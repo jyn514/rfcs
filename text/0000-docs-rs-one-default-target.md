@@ -210,7 +210,7 @@ docs.rs has a default execution time limit of 15 minutes.
 At time of writing, there are only two crates with exceptions to this limit:
 20 and 25 minutes respectively.
 
-Most of the time, when the docs.rs queue gets backed up it's not because of a
+Most of the time, when the docs.rs queue gets backed up it isn't because of a
 single crate clogging up the queue, but instead because many crates have been
 released at the same time. Some projects release over 300 crates at the same
 time, and building all of them can take several hours, delaying other crates
