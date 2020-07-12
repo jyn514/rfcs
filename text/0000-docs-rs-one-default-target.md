@@ -22,18 +22,10 @@ time for all crates and additionally reduce the resource cost of operating
 docs.rs.
 
 <!-- TODO: make this less clunky -->
-<!--Don't want to accumulate docs no one looks at
-<!--
-The main resource cost for docs.rs is storage.
-We currently store 3.6 TB of documentation on S3, and since we never delete documentation,
-this number will only go up over time. Currently, we have no trouble affording this storage,
-but if Rust and docs.rs are to be sustainable for many years into the future,
-we need to keep an eye on how much storage we're using.
--->
-
-For most crates, the documentation is the same on every platform, so there is no need to build it many times.
-Building 5 targets means that builds take 5 times as long to finish,
-and means that docs.rs stores 5 times as much documentation, increasing our fixed costs.
+For most crates, the documentation is the same on every platform, so there's
+no need to build it many times.
+Building 5 targets means that builds take 5 times as long to finish
+and that docs.rs stores 5 times as much documentation, increasing our fixed costs.
 If docs.rs only builds for one target,
 then
 - queue times will go down for crate maintainers
@@ -228,23 +220,6 @@ By building only a single target, we can reduce this delay significantly.
 Additionally, this will reduce delays overall significantly, even for projects that only publish a single crate at a time.
 
 <!--
-## Background: How much storage is a lot?
-
-Currently, docs.rs adds roughly 200k files a day to the server.
-It has 3.2 terabytes in storage, with about 2 gigabytes added per day.
-There are a total of approximately 320 million files currently stored.
--->
-
-<!--
-## Background: Other reasons storage costs are high
-
-- Currently, docs.rs does not compress HTML documentation,
-  needlessly increasing storage costs by a great deal. This will be [fixed soon][docs.rs#780].
-- Currently, docs.rs stores a [separate copy of the source code for each platform][duplicate-source].
-  This is not ideal and should be fixed eventually, but is not a large contributor to our fixed costs.
-  -->
-
-<!--
 This is the technical portion of the RFC. Explain the design in sufficient detail that:
 
     Its interaction with other features is clear.
@@ -265,22 +240,6 @@ The section should return to the examples given in the previous section, and exp
 - We could keep the status quo, building all 5 targets for all crates.
   Doing so would avoid breaking the documentation for any crate,
   but keep queue times relatively high, and over time would increase our resource usage a great deal.
-<!--
-- We could keep building all 5 targets but implement parallel builds.
-  This would decrease queue times and avoid a single crate from clogging up the queue,
-  at the cost of increasing resource costs.
-  However, this would not help as much when many crates are released at the same time.
-  Additionally, implementing parallel builds will be difficult from an implementation perspective;
-  there is a need to balance resource usage by builds against resource usage from the docs.rs web server
-  (as most readers will know, Rust compiles can be very long and resource intensive).
-  Parallel builds does not conflict with this RFC, so it is possible to implement both.
-  -->
-<!-- - We could build only a single default target, but make it something other than `x86_64-unknown-linux-gnu`.
-  This requires the docs.rs host to be same as the default or proc-macros and build scripts will break
-  (see [docs.rs#491] and [docs.rs#440] for details).
-  Switching the host is possible but very difficult; it would be at least a multi-month project. -->
-
-  <!-- installing things on windows is painful -->
 
 <!--
 - Why is this design the best in the space of possible designs?
@@ -325,23 +284,6 @@ Please also take into consideration that rust sometimes intentionally diverges f
 only has logs for the default target). Building for one target would save
 generating many of the logs - we'd only generate them for
 targets that were explicitly requested.
-
-<!--
-- docs.rs could delete documentation for non-default targets on past releases.
-  This needs some care, as the default target was only configurable
-  starting in [October 2018][docs.rs#255].
-  Releases prior to that are marked as having a default of `x86_64-unknown-linux-gnu`
-  whether that was the intent or not.
-- docs.rs could delete documentation for non-default targets on past releases,
-  excluding the latest release. This gives almost all of the storage cost savings,
-  while not affecting users very much since most use the latest version.
-  Additionally, it could avoid deleting targets that were explicitly requested
-  by `targets = ...` in Cargo.toml. This needs some care, as additional targets
-  were only configurable starting in [March 2020][docs.rs#632], and it is not possible
-  before that to distinguish explicitly requested targets from automatically built targets.
-- docs.rs could delete documentation for non-default targets on releases older than a certain date (say a year)
-- docs.rs could delete documentation for yanked releases.
--->
 
 <!--
 Think about what the natural extension and evolution of your proposal would
