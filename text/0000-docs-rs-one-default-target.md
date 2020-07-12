@@ -1,35 +1,59 @@
 - Feature Name: `docs-rs-one-default-target`
-- Start Date: 2020-05-28
+- Start Date: 2020-07-12
 - RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
 - Rust Issue: [rust-lang/docs.rs#343](https://github.com/rust-lang/docs.rs/issues/343)
 
 # Summary
 [summary]: #summary
 
-Currently, docs.rs builds for 5 targets by default for each crate published to crates.io.
-This RFC proposes for docs.rs to by default only build one target.
+Currently, docs.rs builds documentation for 5 targets by default for each crate published to crates.io.
+This RFC proposes for docs.rs to only build `x86_64-unknown-linux-gnu` by default.
 
 # Motivation
 [motivation]: #motivation
 
+Most crates are the same on all targets, so there's no point in building them
+for every target.
+
 Most crates do not compile successfully when cross-compiled.
 As a result, trying to cross-compile them wastes time and resources for little benefit.
-By reducing the number of targets built by default, we can speed up queue time for all crates
-and additionally reduce the resource cost of operating docs.rs.
+By reducing the number of targets built by default, we can speed up queue
+time for all crates and additionally reduce the resource cost of operating
+docs.rs.
 
+<!-- TODO: make this less clunky -->
+<!--Don't want to accumulate docs no one looks at
+<!--
 The main resource cost for docs.rs is storage.
 We currently store 3.6 TB of documentation on S3, and since we never delete documentation,
 this number will only go up over time. Currently, we have no trouble affording this storage,
 but if Rust and docs.rs are to be sustainable for many years into the future,
 we need to keep an eye on how much storage we're using.
+-->
 
 For most crates, the documentation is the same on every platform, so there is no need to build it many times.
 Building 5 targets means that builds take 5 times as long to finish,
 and means that docs.rs stores 5 times as much documentation, increasing our fixed costs.
 If docs.rs only builds for one target,
-then queue times will go down for maintainers and storage costs will down for the docs.rs team.
+then
+- queue times will go down for crate maintainers
+- storage costs will down for the docs.rs team, and
+- there will be fewer pages built that will never be looked at.
 
-See [the issue for building a single target][docs.rs#343] for more of the history behind the motivation.
+In particular, the very largest crates built by docs.rs are for embedded systems
+(usually generated using `svd2rust`). These crates can have several gigabytes
+of documentation and thousands of HTML files, all of which are the same
+on the current default targets.
+
+For crates where the documentation is different, there's a simple way to opt-in
+to more targets in `Cargo.toml`:
+
+```toml
+[package.metadata.docs.rs]
+targets = ["target1", "target2", ...]
+```
+
+<!--See [the issue for building a single target][docs.rs#343] for more of the history behind the motivation.-->
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
@@ -62,7 +86,7 @@ especially if their features are substantially different between platforms.
 However, it is easy to opt-in to the old behavior,
 and they will have plenty of advance notice before the change is made.
 
-For example, [`winapi` choose to target all Windows platforms][winapi-commit] as follows:
+For example, [`winapi` chose to target all Windows platforms][winapi-commit] as follows:
 
 ```toml
 targets = ["aarch64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-pc-windows-msvc"] 
@@ -85,10 +109,82 @@ For implementation-oriented RFCs (e.g. for compiler internals), this section sho
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-If a crate published to crates.io has neither `targets` nor `default-target` configured in `[package.metadata.docs.rs]`,
+1. If a crate published to crates.io has neither `targets` nor `default-target` configured in `[package.metadata.docs.rs]`,
 it will be built for the `x86_64-unknown-linux-gnu` target.
-Otherwise, if it has `default-target` set but not `targets`, it will be built for only that target.
-Otherwise, it will be built [as currently documented on docs.rs][docs.rs metadata].
+2. If it has `default-target` set but not `targets`, it will be built for `default-target` but no other platform.
+3. If it has `targets` set but not `default-target`, it will be treated as if the first entry in `targets` is the default target.
+4. If both are set, all `targets` will be built and `default-target` shown on `/:crate/:version`. Targets are deduplicated, so specifying the same target twice has no effect.
+5. If `targets` is set to an empty list,
+    - If `default-target` is unset, it will be built for `x86_64-unknown-linux-gnu`.
+    - Otherwise, it will be built for `default-target`.
+
+## Examples
+
+- This crate will be built for `x86_64-unknown-linux-gnu`.
+
+```toml
+[package.metadata.docs.rs]
+all-features = true
+```
+
+- These crates will be built for `x86_64-pc-windows-msvc`.
+
+```toml
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+```
+
+```toml
+[package.metadata.docs.rs]
+targets = ["x86_64-pc-windows-msvc"]
+```
+
+- These crates will be built for all Windows platforms.
+
+In this case the default target will be `aarch64-pc-windows-msvc`.
+
+```toml
+targets = ["aarch64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-pc-windows-msvc"]
+```
+
+In this case the default target will be `x86_64-pc-windows-msvc`.
+
+```toml
+default-target = "x86_64-pc-windows-msvc"
+targets = ["aarch64-pc-windows-msvc", "i686-pc-windows-msvc", "x86_64-pc-windows-msvc"] 
+```
+
+- This crates will be built for `x86_64-apple-darwin`.
+
+```toml
+default-target = "x86_64-apple-darwin"
+targets = []
+```
+
+## Background: How many crates will be affected?
+
+<!-- TODO: add more server logs with stats of target views
+- percentage of views (relative to crate)
+- metric for non-default target visits on grafana?
+-->
+
+The answer to this question is not clear. docs.rs can measure the number of visits to
+`/:crate/:version/:platform`, but this only shows how many users are looking at pages built for different targets, not whether those pages are different. It also does not show pages which are different but have no visitors viewing the documentation.
+
+With that said, [here is a list](https://gist.github.com/jyn514/df510c022a558d4bdffc7cf5fc478c3f) of the visits to non-default platforms between
+2020-06-29 and 2020-07-12. It does not include crates with fewer than 5 visits to non-default platforms.
+
+The list was generated as follows:
+
+<details><summary>Shell script</summary>
+
+```sh
+zgrep -h -o '"GET [^"]*" 200 ' /var/log/nginx/access.log* | grep -v winapi | cut -d / -f 2-4 | grep -v '^crate/' | grep -f ~/targets | cut -d / -f 1 | sort | uniq -c | awk '{ if ($1 >= 5) print $0 }' | sort -k 1 -h
+```
+
+Note that winapi is excluded since it explicitly gives its targets in `Cargo.toml`.
+
+</details>
 
 ## Background: Why do crates fail to build when cross-compiled?
 
@@ -99,48 +195,9 @@ and `pkg-config` does not allow cross compiling by default.
 See for example the build failure for `crates-index-diff 7.0.2`:
 
 ```
-   Compiling openssl-sys v0.9.57
 error: failed to run custom build command for `openssl-sys v0.9.57`
-
-Caused by:
-  process didn't exit successfully: `/opt/rustwide/target/debug/build/openssl-sys-3cbb8efeb074bfbf/build-script-main` (exit code: 101)
 --- stdout
-cargo:rustc-cfg=const_fn
-cargo:rerun-if-env-changed=I686_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR
-I686_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR unset
-cargo:rerun-if-env-changed=OPENSSL_LIB_DIR
-OPENSSL_LIB_DIR unset
-cargo:rerun-if-env-changed=I686_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR
-I686_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR unset
-cargo:rerun-if-env-changed=OPENSSL_INCLUDE_DIR
-OPENSSL_INCLUDE_DIR unset
-cargo:rerun-if-env-changed=I686_UNKNOWN_LINUX_GNU_OPENSSL_DIR
-I686_UNKNOWN_LINUX_GNU_OPENSSL_DIR unset
-cargo:rerun-if-env-changed=OPENSSL_DIR
-OPENSSL_DIR unset
 run pkg_config fail: "Cross compilation detected. Use PKG_CONFIG_ALLOW_CROSS=1 to override"
-
---- stderr
-thread 'main' panicked at '
-
-Could not find directory of OpenSSL installation, and this `-sys` crate cannot
-proceed without this knowledge. If OpenSSL is installed and this crate had
-trouble finding it,  you can set the `OPENSSL_DIR` environment variable for the
-compilation process.
-
-Make sure you also have the development packages of openssl installed.
-For example, `libssl-dev` on Ubuntu or `openssl-devel` on Fedora.
-
-If you're in a situation where you think the directory *should* be found
-automatically, please open a bug at https://github.com/sfackler/rust-openssl
-and include information about your system as well as this message.
-
-$HOST = x86_64-unknown-linux-gnu
-$TARGET = i686-unknown-linux-gnu
-openssl-sys = 0.9.57
-
-', /opt/rustwide/cargo-home/registry/src/github.com-1ecc6299db9ec823/openssl-sys-0.9.57/build/find_normal.rs:155:5
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
 Here, `pkg_config` fails because docs.rs is cross compiling from `x86_64-unknown-linux-gnu` to `i686-unknown-linux-gnu`,
@@ -158,29 +215,34 @@ or are not interested in putting in the effort to make it succeed.
 ## Background: How long are queue times currently?
 
 docs.rs has a default execution time limit of 15 minutes.
-Currently, we only have two exceptions to this limit:
-`stm32h7xx-hal` and `mimxrt1062` are allowed 20 and 25 minutes respectively.
+At time of writing, there are only two crates with exceptions to this limit:
+20 and 25 minutes respectively.
 
-Most of the time, when the docs.rs queue gets backed up it is not due to a single crate clogging up the queue,
-but instead because many crates have been released at the same time.
-Some projects release over 300 crates at the same time,
-and building all of them can take several hours, delaying other crates in the meantime.
+Most of the time, when the docs.rs queue gets backed up it's not because of a
+single crate clogging up the queue, but instead because many crates have been
+released at the same time. Some projects release over 300 crates at the same
+time, and building all of them can take several hours, delaying other crates
+in the meantime.
 
 By building only a single target, we can reduce this delay significantly.
 Additionally, this will reduce delays overall significantly, even for projects that only publish a single crate at a time.
 
+<!--
 ## Background: How much storage is a lot?
 
 Currently, docs.rs adds roughly 200k files a day to the server.
 It has 3.2 terabytes in storage, with about 2 gigabytes added per day.
 There are a total of approximately 320 million files currently stored.
+-->
 
+<!--
 ## Background: Other reasons storage costs are high
 
 - Currently, docs.rs does not compress HTML documentation,
   needlessly increasing storage costs by a great deal. This will be [fixed soon][docs.rs#780].
 - Currently, docs.rs stores a [separate copy of the source code for each platform][duplicate-source].
   This is not ideal and should be fixed eventually, but is not a large contributor to our fixed costs.
+  -->
 
 <!--
 This is the technical portion of the RFC. Explain the design in sufficient detail that:
@@ -203,6 +265,7 @@ The section should return to the examples given in the previous section, and exp
 - We could keep the status quo, building all 5 targets for all crates.
   Doing so would avoid breaking the documentation for any crate,
   but keep queue times relatively high, and over time would increase our resource usage a great deal.
+<!--
 - We could keep building all 5 targets but implement parallel builds.
   This would decrease queue times and avoid a single crate from clogging up the queue,
   at the cost of increasing resource costs.
@@ -211,10 +274,13 @@ The section should return to the examples given in the previous section, and exp
   there is a need to balance resource usage by builds against resource usage from the docs.rs web server
   (as most readers will know, Rust compiles can be very long and resource intensive).
   Parallel builds does not conflict with this RFC, so it is possible to implement both.
-- We could build only a single default target, but make it something other than `x86_64-unknown-linux-gnu`.
+  -->
+<!-- - We could build only a single default target, but make it something other than `x86_64-unknown-linux-gnu`.
   This requires the docs.rs host to be same as the default or proc-macros and build scripts will break
   (see [docs.rs#491] and [docs.rs#440] for details).
-  Switching the host is possible but very difficult; it would be at least a multi-month project.
+  Switching the host is possible but very difficult; it would be at least a multi-month project. -->
+
+  <!-- installing things on windows is painful -->
 
 <!--
 - Why is this design the best in the space of possible designs?
@@ -249,12 +315,18 @@ Please also take into consideration that rust sometimes intentionally diverges f
 
 - How long should docs.rs wait before changing the default?
 - How many crates will this affect?
-  Note that 'affect' is ambiguous here since a crate could have different docs on different platforms
-  but not intend to have differences.
+  Note that 'affect' is ambiguous here since a crate could have different
+  docs on different platforms but not intend to have differences.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
+- docs.rs plans to add build logs for all targets in the future (currently it
+only has logs for the default target). Building for one target would save
+generating many of the logs - we'd only generate them for
+targets that were explicitly requested.
+
+<!--
 - docs.rs could delete documentation for non-default targets on past releases.
   This needs some care, as the default target was only configurable
   starting in [October 2018][docs.rs#255].
@@ -269,6 +341,7 @@ Please also take into consideration that rust sometimes intentionally diverges f
   before that to distinguish explicitly requested targets from automatically built targets.
 - docs.rs could delete documentation for non-default targets on releases older than a certain date (say a year)
 - docs.rs could delete documentation for yanked releases.
+-->
 
 <!--
 Think about what the natural extension and evolution of your proposal would
