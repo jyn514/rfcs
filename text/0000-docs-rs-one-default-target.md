@@ -42,7 +42,7 @@ to more targets in `Cargo.toml`:
 
 ```toml
 [package.metadata.docs.rs]
-targets = ["target1", "target2", ...]
+targets = ["target1", "target2"] # ...
 ```
 
 <!--See [the issue for building a single target][docs.rs#343] for more of the history behind the motivation.-->
