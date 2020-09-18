@@ -14,7 +14,7 @@ not just relative to the rustdoc version.
 # Motivation
 [motivation]: #motivation
 
-Rustdoc generates a separate HTML page for each [item] in a crate.
+[Rustdoc] generates a separate HTML page for each [item] in a crate.
 The URL for this page currently stable relative to rustdoc; in other words,
 Rustdoc guarantees that updating `rustdoc` without changing the source code will not change the URL generated.
 This is a 'de facto' guarantee - it's not documented, but there's been no breaking change to the format since pre-1.0.
@@ -35,8 +35,8 @@ would not affect the URL.
 The primary motivation for this feature is to allow linking to a semantic version
 of the docs, rather than an exact version. This has several applications:
 
-- [docs.rs] could link to `/package/0.2/path` instead of `/package/0.2.5/path`, making the documentation users see more up-to-date
-- blogs could link to exact URLs without fear of the URL breaking ([#rust-lang/rust#55160 (comment)][55160-blog])
+- [docs.rs] could link to `/package/0.2/path` instead of `/package/0.2.5/path`, making the documentation users see more up-to-date ([rust-lang/docs.rs#1055])
+- blogs could link to exact URLs without fear of the URL breaking ([rust-lang/rust#55160 (comment)][55160-blog])
 - URLs in the standard library documentation would change less often ([rust-lang/rust#55160][55160])
 
 Note that this is a different, but related, use case than [intra-doc links].
@@ -46,10 +46,14 @@ outside of Rust code.
 
 <!--- It avoids needlessly breaking links when an 'internal' change happens ([rust-lang/rust#55160][55160])-->
 
+[Rustdoc]: https://doc.rust-lang.org/rustdoc/
+[item]: https://doc.rust-lang.org/reference/items.html
 [docs.rs]: https://docs.rs/
+[could link]: https://github.com/rust-lang/docs.rs/issues/1055
 [55160]: https://github.com/rust-lang/rust/issues/55160
 [55160-blog]: https://github.com/rust-lang/rust/issues/55160#issuecomment-680751534
 [intra-doc links]: https://github.com/rust-lang/rfcs/blob/master/text/1946-intra-rustdoc-links.md
+[rust-lang/docs.rs#1055]: https://github.com/rust-lang/docs.rs/issues/1055
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
@@ -84,8 +88,6 @@ Rustdoc will make the following changes to URL structure:
 	This generates a page at `foo/struct.Foo.html`, but _not_ at `struct.Foo.html`.
 	After this change, rustdoc will generate a page at the top level which redirects
 	to the version nested in the module.
-
-[item]: https://doc.rust-lang.org/reference/items.html
 
 <!--
 Explain the proposal as if it was already included in the language and you were teaching it to another Rust programmer. That generally means:
