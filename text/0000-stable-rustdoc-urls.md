@@ -189,6 +189,14 @@ that would go up to about [850,000 items that overlap][overlap-after-change].
 # Prior art
 [prior-art]: #prior-art
 
+- `go doc` generates all documentation on one page and uses URL hashes, without namespacing.
+   This causes conflicts when two items from different namespaces are in the same package.
+- `java` only allows classes at the top-level, so `javadoc` has no need for namespacing.
+   To distinguish between methods and fields, `javadoc` includes `()` in the URL fragment for methods.
+- `Racket` only allows functions at the top-level, and so has no need for namespacing.
+- `doxygen` names HTML pages after their C++ source files, and appends a random hash in the URL fragment to avoid namespace conflicts.
+
+<!--
 Discuss prior art, both the good and the bad, in relation to this proposal.
 A few examples of what this can include are:
 
@@ -202,13 +210,18 @@ If there is no prior art, that is fine - your ideas are interesting to us whethe
 
 Note that while precedent set by other languages is some motivation, it does not on its own motivate an RFC.
 Please also take into consideration that rust sometimes intentionally diverges from common language features.
+-->
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
+- Is there a way to resolve the naming conflicts on Windows? If not, is that worth blocking the RFC, given there are existing conflicts?
+
+<!--
 - What parts of the design do you expect to resolve through the RFC process before this gets merged?
 - What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
 - What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
+-->
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
