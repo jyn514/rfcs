@@ -21,9 +21,9 @@ This is a 'de facto' guarantee - it's not documented, but there's been no breaki
 
 However, Rustdoc does _not_ currently guarantee that making a semver-compatible change to your code will preserve the same URL.
 This means that, for instance, making a type an `enum` instead of a `struct` will change the URL,
-even if your change is in every other way semver-compatible. After this change, Rustdoc will guarantee that the URL would stay the same.
+even if your change is in every other way semver-compatible. After this RFC, Rustdoc will guarantee that the URL would stay the same.
 
-<!-->
+<!--
 From a user-facing perspective, very little would change:
 links within Rustdoc documentation would still work, as would existing links
 and copying the URL from the address bar. However, the new format has the benefit
