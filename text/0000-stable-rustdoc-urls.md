@@ -15,7 +15,7 @@ not just relative to the rustdoc version.
 [motivation]: #motivation
 
 [Rustdoc] generates a separate HTML page for each [item] in a crate.
-The URL for this page currently stable relative to rustdoc; in other words,
+The URL for this page is currently stable relative to rustdoc; in other words,
 Rustdoc guarantees that updating `rustdoc` without changing the source code will not change the URL generated.
 This is a 'de facto' guarantee - it's not documented, but there's been no breaking change to the format since pre-1.0.
 
