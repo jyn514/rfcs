@@ -23,15 +23,6 @@ However, Rustdoc does _not_ currently guarantee that making a semver-compatible 
 This means that, for instance, making a type an `enum` instead of a `struct` will change the URL,
 even if your change is in every other way semver-compatible. After this RFC, Rustdoc will guarantee that the URL would stay the same.
 
-<!--
-From a user-facing perspective, very little would change:
-links within Rustdoc documentation would still work, as would existing links
-and copying the URL from the address bar. However, the new format has the benefit
-that it works regardless of how the name ends up in the namespace:
-re-exports, different kinds of types, and any other semver-compatible changes
-would not affect the URL.
--->
-
 The primary motivation for this feature is to allow linking to a semantic version
 of the docs, rather than an exact version. This has several applications:
 
@@ -43,8 +34,6 @@ Note that this is a different, but related, use case than [intra-doc links].
 Intra-doc links allow linking consistently in the presence of re-exports for _relative_ links.
 This is intended to be used for _absolute_ links. Additionally, this would allow linking consistently
 outside of Rust code.
-
-<!--- It avoids needlessly breaking links when an 'internal' change happens ([rust-lang/rust#55160][55160])-->
 
 [Rustdoc]: https://doc.rust-lang.org/rustdoc/
 [item]: https://doc.rust-lang.org/reference/items.html
@@ -89,18 +78,6 @@ Rustdoc will make the following changes to URL structure:
 	After this change, rustdoc will generate a page at the top level which redirects
 	to the version nested in the module.
 
-<!--
-Explain the proposal as if it was already included in the language and you were teaching it to another Rust programmer. That generally means:
-
-- Introducing new named concepts.
-- Explaining the feature largely in terms of examples.
-- Explaining how Rust programmers should *think* about the feature, and how it should impact the way they use Rust. It should explain the impact as concretely as possible.
-- If applicable, provide sample error messages, deprecation warnings, or migration guidance.
-- If applicable, describe the differences between teaching this to existing Rust programmers and new Rust programmers.
-
-For implementation-oriented RFCs (e.g. for compiler internals), this section should focus on how compiler contributors should think about the change, and give examples of its concrete impact. For policy RFCs, this section should provide an example-driven introduction to the policy, and explain its impact in concrete terms.
--->
-
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -136,16 +113,6 @@ were inlined with `#[doc(inline)]` after this RFC.
 
 There will _not_ be a page generated at `kind.name.html` at the level of the re-export, since it's not possible for there to be any existing links there that were not broken.
 
-<!--
-This is the technical portion of the RFC. Explain the design in sufficient detail that:
-
-- Its interaction with other features is clear.
-- It is reasonably clear how the feature would be implemented.
-- Corner cases are dissected by example.
-
-The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
--->
-
 # Drawbacks
 [drawbacks]: #drawbacks
 
@@ -176,8 +143,6 @@ that would go up to about [850,000 items that overlap][overlap-after-change].
 [currently overlap]: https://ipfs.io/ipfs/QmfZatebkVFdEUYQtPaAitsBbmLKAtQgaWLciSnjtLAWfv/case-conflicts.txt.zst
 [overlap-after-change]: https://ipfs.io/ipfs/QmfZatebkVFdEUYQtPaAitsBbmLKAtQgaWLciSnjtLAWfv/cased-namespace-conflicts.txt.zst
 
-<!-- Why should we *not* do this? -->
-
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
@@ -199,32 +164,10 @@ that would go up to about [850,000 items that overlap][overlap-after-change].
 - `Racket` only allows functions at the top-level, and so has no need for namespacing.
 - `doxygen` names HTML pages after their C++ source files, and appends a random hash in the URL fragment to avoid namespace conflicts.
 
-<!--
-Discuss prior art, both the good and the bad, in relation to this proposal.
-A few examples of what this can include are:
-
-- For language, library, cargo, tools, and compiler proposals: Does this feature exist in other programming languages and what experience have their community had?
-- For community proposals: Is this done by some other community and what were their experiences with it?
-- For other teams: What lessons can we learn from what other communities have done here?
-- Papers: Are there any published papers or great posts that discuss this? If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
-
-This section is intended to encourage you as an author to think about the lessons from other languages, provide readers of your RFC with a fuller picture.
-If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other languages.
-
-Note that while precedent set by other languages is some motivation, it does not on its own motivate an RFC.
-Please also take into consideration that rust sometimes intentionally diverges from common language features.
--->
-
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
 - Is there a way to resolve the naming conflicts on Windows? If not, is that worth blocking the RFC, given there are existing conflicts?
-
-<!--
-- What parts of the design do you expect to resolve through the RFC process before this gets merged?
-- What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-- What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
--->
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
@@ -295,23 +238,3 @@ Rustdoc could stabilize page hashes:
 [hashes]: https://url.spec.whatwg.org/#fragment-state
 [assoc-items]: https://github.com/rust-lang/rust/issues/76895
 [RFC 195]: https://github.com/rust-lang/rfcs/blob/master/text/0195-associated-items.md#inherent-associated-items
-
-<!--
-Think about what the natural extension and evolution of your proposal would
-be and how it would affect the language and project as a whole in a holistic
-way. Try to use this section as a tool to more fully consider all possible
-interactions with the project and language in your proposal.
-Also consider how the this all fits into the roadmap for the project
-and of the relevant sub-team.
-
-This is also a good place to "dump ideas", if they are out of scope for the
-RFC you are writing but otherwise related.
-
-If you have tried and cannot think of any future possibilities,
-you may simply state that you cannot think of anything.
-
-Note that having something written down in the future-possibilities section
-is not a reason to accept the current or a future RFC; such notes should be
-in the section on motivation or rationale in this or subsequent RFCs.
-The section merely provides additional information.
--->
