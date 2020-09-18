@@ -106,7 +106,7 @@ For implementation-oriented RFCs (e.g. for compiler internals), this section sho
 
 ## Item pages will be dependent only on the namespace
 
-Rust has three namespaces. For simplicity, this will only consider items that can be at the module level,
+Rust has [three namespaces][Namespace]. For simplicity, this will only consider items that can be at the module level,
 since function locals cannot be documented.
 
 1. The value namespace. This includes `fn`, `const`, and `static`.
@@ -117,6 +117,13 @@ Rust does not permit there to be overlaps within a namespace,
 except for overlaps caused by globbing, where there must be a clear 'primary' import.
 This means that a name and namespace is [always sufficient][find-name-namespace] to identify an item.
 
+Rustdoc will use the following links, depending on the namespace:
+
+- `Name.t.html` for types
+- `Name.v.html` for values
+- `Name.m.html` for macros
+
+[Namespace]: https://doc.rust-lang.org/nightly/nightly-rustc/rustc_hir/def/enum.Namespace.html
 [find-name-namespace]: https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/ty/struct.AssociatedItems.html#method.find_by_name_and_namespace
 
 ## Re-exports will generate a page pointing to the canonical version
@@ -171,9 +178,13 @@ that would go up to about [850,000 items that overlap][overlap-after-change].
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-- Why is this design the best in the space of possible designs?
-- What other designs have been considered and what is the rationale for not choosing them?
-- What is the impact of not doing this?
+- Rustdoc could stabilize the links it uses, but with a different format (such as `value.Name.html`).
+- Rustdoc could stabilize the links it uses, but without keeping backwards compatibility by not generating `kind.name.html`. This has little benefit over the RFC,
+  other than slightly less disk space used and implementation complexity.
+- Rustdoc could keep the status quo. This can cause no naming conflicts on Windows, but has the drawback that links could silently break even for semver-compatible changes.
+- Rustdoc could choose to make URLs stable _neither_ across rustdoc versions nor the version of the code being documented,
+  for example by using `kind.name.SHA256SUM(rustdoc version).html`. This makes it more clear that the URLs are not intended to be stable,
+  at the cost of breaking links across much of the ecosystem.
 
 # Prior art
 [prior-art]: #prior-art
