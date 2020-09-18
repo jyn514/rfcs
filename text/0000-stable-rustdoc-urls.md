@@ -110,11 +110,11 @@ Rust has [three namespaces][Namespace]. For simplicity, this will only consider 
 since function locals cannot be documented.
 
 1. The value namespace. This includes `fn`, `const`, and `static`.
-2. The type namespace. This includes `mod`, `struct`, `union`, `enum`, `trait`, `type`, struct fields, and enum variants.
+2. The type namespace. This includes `mod`, `struct`, `union`, `enum`, `trait`, and `type`.
 3. The macro namespace. This includes `macro_rules!`, attribute macros, and derive macros.
 
-Rust does not permit there to be overlaps within a namespace,
-except for overlaps caused by globbing, where there must be a clear 'primary' import.
+Rust does not permit there to be overlaps within a namespace;
+overlaps in globbing cause the glob import to be shadowed and [unusable].
 This means that a name and namespace is [always sufficient][find-name-namespace] to identify an item.
 
 Rustdoc will use the following links, depending on the namespace:
@@ -123,8 +123,11 @@ Rustdoc will use the following links, depending on the namespace:
 - `Name.v.html` for values
 - `Name.m.html` for macros
 
+Rustdoc will continue to use directories (and `index.html`) for modules.
+
 [Namespace]: https://doc.rust-lang.org/nightly/nightly-rustc/rustc_hir/def/enum.Namespace.html
 [find-name-namespace]: https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/ty/struct.AssociatedItems.html#method.find_by_name_and_namespace
+[unusable]: https://play.rust-lang.org/?version=stable&mode=debug&edition=2018&gist=548f2f5e08600d4ad732c407ab3dd59f
 
 ## Re-exports will generate a page pointing to the canonical version
 
@@ -281,8 +284,18 @@ Rustdoc could stabilize page hashes:
 	or how this would deal with types with [characters that can't go in URL hashes][hashes] (such as `()`).
 	Rustdoc could possibly use percent-encoding for the second issue.
 
+- All other URL fragments would be kept the same:
+	+ `#variant.{name}` for enum variants
+	+ `#structfield.{name}` for struct fields
+	+ `#variant.{parent}.field.{name}` for anonymous structs in enums (`enum Parent { A { field: usize }}`).
+	   This may require redesign to avoid conflicts in fields between different variants.
+	+ `#associatedconstant.{name}` for associated constants in traits. This may require redesign when [RFC 195] is implemented.
+	+ `#associatedtype.{name}` for associated types (same as above)
+
 [hashes]: https://url.spec.whatwg.org/#fragment-state
 [assoc-items]: https://github.com/rust-lang/rust/issues/76895
+[RFC 195]: https://github.com/rust-lang/rfcs/blob/master/text/0195-associated-items.md#inherent-associated-items
+
 <!--
 Think about what the natural extension and evolution of your proposal would
 be and how it would affect the language and project as a whole in a holistic
