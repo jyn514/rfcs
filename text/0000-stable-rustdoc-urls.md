@@ -258,8 +258,7 @@ Rustdoc could stabilize page hashes:
 	Rustdoc could possibly use percent-encoding for the second issue.
 
 [hashes]: https://url.spec.whatwg.org/#fragment-state
-<!-- TODO: open an issue for this instead of linking to the PR -->
-[assoc-items]: https://github.com/rust-lang/rust/pull/74489
+[assoc-items]: https://github.com/rust-lang/rust/issues/76895
 <!--
 Think about what the natural extension and evolution of your proposal would
 be and how it would affect the language and project as a whole in a holistic
