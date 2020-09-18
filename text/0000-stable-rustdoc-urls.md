@@ -64,7 +64,7 @@ Rustdoc will make the following changes to URL structure:
 
 	Consider the struct `std::process::Command`.
 	Currently, the URL for it looks like `std/process/struct.Command.html`.
-	This RFC proposes to change the URL to `std/process/Command.t.html`.
+	This RFC proposes to change the URL to `std/process/t.Command.html`.
 	Pages named `kind.name.html` would still be generated (to avoid breaking existing links),
 	but would immediately redirect to the new URL.
 
@@ -119,9 +119,9 @@ This means that a name and namespace is [always sufficient][find-name-namespace]
 
 Rustdoc will use the following links, depending on the namespace:
 
-- `Name.t.html` for types
-- `Name.v.html` for values
-- `Name.m.html` for macros
+- `t.Name.html` for types
+- `v.Name.html` for values
+- `m.Name.html` for macros
 
 Rustdoc will continue to use directories (and `index.html`) for modules.
 
@@ -153,8 +153,8 @@ The section should return to the examples given in the previous section, and exp
 This could cause overlaps in names, such as the following:
 
 ```rust
-struct Command; // page generated at `Command.t.html`
-enum command {} // page generated at `command.t.html`
+struct Command; // page generated at `t.Command.html`
+enum command {} // page generated at `t.command.html`
 ```
 
 Note that this is an existing problem, since you could have two items with the
